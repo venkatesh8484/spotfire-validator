@@ -125,13 +125,31 @@ class SpotfireClient:
             "password": self.config.password,
         }
         logger.info("Authenticating to Spotfire as %s …", self.config.username)
+        logger.info("POST %s", url)
         resp = self._session.post(url, json=body, timeout=self.config.timeout)
+
+        # Log response details for debugging
+        logger.info("Response status: %d", resp.status_code)
+        logger.info("Response headers: %s", dict(resp.headers))
+        logger.info("Response body (first 500 chars): %s", resp.text[:500])
+
         resp.raise_for_status()
+
+        # Check content type before parsing JSON
+        content_type = resp.headers.get("Content-Type", "")
+        if "json" not in content_type.lower():
+            raise RuntimeError(
+                f"Expected JSON response but got Content-Type: {content_type}\n"
+                f"Response body: {resp.text[:500]}"
+            )
 
         data = resp.json()
         token = data.get("accessToken", "")
         if not token:
-            raise RuntimeError("Spotfire login succeeded but no token returned")
+            raise RuntimeError(
+                f"Spotfire login succeeded but no token returned.\n"
+                f"Response: {resp.text[:500]}"
+            )
 
         self._token = token
         self._session.headers["Authorization"] = f"Bearer {token}"
