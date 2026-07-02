@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Automation Services job template: Set Bookmark + Export Data Tables to CSV.
+
+  Placeholders (replaced by export_job_builder.py):
+    {{ANALYSIS_PATH}}   — Spotfire library path of the DXP (e.g. /Users/Cargo/Revenue_Report_TD)
+    {{BOOKMARK_NAME}}   — Name of the bookmark to apply (empty = no bookmark task)
+    {{DATA_TABLE_NAME}} — Name of the data table to export (or * for all)
+    {{OUTPUT_DIR}}      — Server-side output directory path
+    {{OUTPUT_FILE}}     — Output CSV file name
+-->
+<asJob xmlns="http://spotfire.tibco.com/schemas/automationjob/v2.0">
+  <job>
+    <id>{{JOB_ID}}</id>
+    <name>Export Data Tables for Validation</name>
+    <description>Spotfire Validator: export data tables to CSV for report comparison</description>
+
+    <!-- 1. Open the analysis -->
+    <task>
+      <id>openAnalysis</id>
+      <type>OpenAnalysis</type>
+      <properties>
+        <analysisPath>{{ANALYSIS_PATH}}</analysisPath>
+        <embeddedData>false</embeddedData>
+      </properties>
+    </task>
+
+    <!-- 2. Apply bookmark (if specified) -->
+    {{BOOKMARK_TASK}}
+
+    <!-- 3. Export data table to CSV -->
+    <task>
+      <id>exportData</id>
+      <type>ExportDataToFile</type>
+      <properties>
+        <dataTable>{{DATA_TABLE_NAME}}</dataTable>
+        <outputPath>{{OUTPUT_DIR}}/{{OUTPUT_FILE}}</outputPath>
+        <format>CSV</format>
+        <encoding>UTF-8</encoding>
+        <includeHeader>true</includeHeader>
+        <rowLimit>{{MAX_ROWS}}</rowLimit>
+      </properties>
+    </task>
+
+    <!-- 4. Save and close -->
+    <task>
+      <id>closeAnalysis</id>
+      <type>CloseAnalysis</type>
+      <properties>
+        <saveChanges>false</saveChanges>
+      </properties>
+    </task>
+  </job>
+</asJob>

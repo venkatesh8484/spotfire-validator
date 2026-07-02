@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────────────────────
+# Spotfire Report Validator — Configuration
+# ──────────────────────────────────────────────────────────────
+
+spotfire:
+  # Spotfire Server base URL (no trailing slash)
+  server_url: "https://spotfire.company.com/spotfire"
+  # REST API base path (Spotfire 10+ uses /api/rest; 7.x uses /spotfire/restapi)
+  api_base: "/api/rest"
+  # Authentication
+  auth_type: "basic"       # basic | oauth
+  username: "automation_user"
+  password: ""             # env: SPOTFIRE_PASSWORD
+  # OAuth settings (only used if auth_type == "oauth")
+  oauth_token_url: ""
+  oauth_client_id: ""
+  oauth_client_secret: ""  # env: SPOTFIRE_OAUTH_SECRET
+  # Request timeout (seconds)
+  timeout: 120
+
+export:
+  # Directory for downloaded CSV exports
+  output_dir: "output/exports"
+  # Safety row limit during validation (0 = no limit)
+  max_rows: 10000
+  # Export format: csv | parquet
+  format: "csv"
+  # Poll interval (seconds) when waiting for Automation Services job
+  poll_interval: 10
+  # Max wait time per job (seconds)
+  job_timeout: 1800
+
+comparison:
+  # Columns to sort by before comparing (empty = sort by all columns)
+  sort_columns: []
+  # Decimal places for float comparison
+  float_precision: 6
+  # Strings treated as NULL
+  null_markers: ["", "NULL", "None", "NaN", "\\N", "null"]
+  # Timestamp normalization format
+  timestamp_format: "%Y-%m-%d %H:%M:%S"
+  # Row count tolerance (% difference allowed, 0.0 = exact)
+  row_count_tolerance_pct: 0.0
+  # Max diff rows to display in report
+  max_diff_rows_display: 50
+
+report:
+  # Directory for HTML reports
+  output_dir: "output/reports"
+
+# ──────────────────────────────────────────────────────────────
+# Report pairs to validate
+# Each pair = one as-is (Teradata) DXP + one to-be (BigQuery) DXP
+# ──────────────────────────────────────────────────────────────
+report_pairs:
+  - name: "Cargo Revenue Report"
+    # Spotfire library path or item ID for the as-is report
+    as_is_dxp: "/Users/Cargo/Revenue_Report_TD"
+    # Spotfire library path or item ID for the to-be report
+    to_be_dxp: "/Users/Cargo/Revenue_Report_BQ"
+    # Bookmark to apply before export (empty = no bookmark, full data)
+    bookmark: ""
+    # Data tables to compare (empty = compare all data tables found)
+    data_tables: []
+    # Per-pair overrides (optional)
+    overrides:
+      row_count_tolerance_pct: 1.0
+
+  # Example: second pair
+  # - name: "DGI Maintenance Dashboard"
+  #   as_is_dxp: "/Users/DGI/Maintenance_TD"
+  #   to_be_dxp: "/Users/DGI/Maintenance_BQ"
+  #   bookmark: "Q1_2026_Validation"
+  #   data_tables: ["MaintenanceData", "CostSummary"]
+  #   overrides:
+  #     row_count_tolerance_pct: 0.5
